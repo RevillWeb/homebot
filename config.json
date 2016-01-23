@@ -1,0 +1,82 @@
+{
+  "lightwaverf": {
+    "ip": "192.168.0.5"
+  },
+  "api": {
+    "token": "j7MTzEW2Iie39zig21N9I9y6h5TETwit",
+    "port": "8124"
+  },
+  "people": [
+    {
+      "name": "Leon",
+      "ip": "192.168.0.4",
+      "image": "https://pbs.twimg.com/profile_images/557971299432030211/0SlKhXU0.jpeg"
+    },
+    {
+      "name": "Allyce",
+      "ip": "192.168.0.7",
+      "image": "https://media.licdn.com/mpr/mpr/shrinknp_200_200/p/1/005/089/1d8/1960735.jpg"
+    }
+  ],
+  "rooms": [
+    {
+      "id": 1,
+      "name": "Living",
+      "devices": [
+        {
+          "id": 1,
+          "name": "Switch 1",
+          "type": "switch"
+        },
+        {
+          "id": 2,
+          "name": "Light 1",
+          "type": "light"
+        },
+        {
+          "id": 3,
+          "name": "Light 2",
+          "type": "light"
+        },
+        {
+          "id": 4,
+          "name": "Switch 2",
+          "type": "switch"
+        }
+      ]
+    }
+  ],
+  "automation": [{
+    "title": "Keep Twigs on when someone is home",
+    "conditions": [
+      {
+        "module": "presence",
+        "data": {
+          "person": "anyone",
+          "property": "home",
+          "value": true
+        }
+      }
+    ],
+    "true_actions": [
+      {
+        "module": "lightwaverf",
+        "data": {
+          "room": "Living",
+          "device": "Switch 1",
+          "action": "on"
+        }
+      }
+    ],
+    "false_actions": [
+      {
+        "module": "lightwaverf",
+        "data": {
+          "room": "Living",
+          "device": "Switch 1",
+          "action": "off"
+        }
+      }
+    ]
+  }]
+}

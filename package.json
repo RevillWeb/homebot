@@ -1,0 +1,22 @@
+{
+  "name": "homebot",
+  "version": "0.0.1",
+  "description": "A home automation suite based around LightwaveRF products",
+  "main": "main.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Leon Revill",
+  "license": "MIT",
+  "dependencies": {
+    "body-parser": "^1.14.2",
+    "events": "^1.1.0",
+    "express": "^4.13.4",
+    "fs": "0.0.2",
+    "json-query": "^1.5.0",
+    "libnmap": "^0.2.24",
+    "lightwaverf": "0.0.1",
+    "q": "^1.4.1",
+    "sys": "0.0.1"
+  }
+}
