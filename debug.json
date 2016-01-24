@@ -1,5 +1,8 @@
 {
   "modules": {
+    "time": {
+      "timezone": "europe/london"
+    },
     "lightwaverf": {
       "ip": "192.168.0.5",
       "api": {
@@ -100,12 +103,12 @@
         ]
       },
       {
-        "title": "Turn lights on when media is paused on TV",
+        "title": "Turn Twigs on when media is paused on GOD",
         "conditions": [
           {
             "module": "plex",
             "data": {
-              "player": "192.168.0.8",
+              "player": "192.168.0.12",
               "property": "state",
               "value": "paused"
             }
@@ -116,7 +119,7 @@
             "module": "lightwaverf",
             "data": {
               "room": "Living",
-              "type": "light",
+              "device": "Switch 1",
               "action": "on"
             }
           }
@@ -126,7 +129,7 @@
             "module": "lightwaverf",
             "data": {
               "room": "Living",
-              "type": "light",
+              "device": "Switch 1",
               "action": "off"
             }
           }

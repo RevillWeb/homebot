@@ -4,12 +4,9 @@ var sys = require('sys');
 var exec = require('child_process').exec;
 var fs = require('fs');
 
-var HomeBotAPI = require('./homebot-api.js');
-
-//Modules
-var PresenceModule = require('./presence-module.js');
-var AutomationModule = require('./automation-module.js');
-var LightwaveRFModule = require('./lightwaverf-module.js');
+//Core
+var automation = require('./core/automation.js');
+var api = require('./core/api.js');
 
 //Get command line arguments
 var args = process.argv.slice(2);
@@ -35,27 +32,19 @@ if (configPath !== null) {
 
         var modules = {};
 
-        if (config.lightwaverf !== undefined && config.lightwaverf.ip !== undefined) {
-            modules["lightwaverf"] = new LightwaveRFModule(config);
+        if (config.modules !== undefined) {
+            for (var key in config.modules) {
+                try {
+                    //modules[key] = new require("./" + key + "Module")(config);
+                    var module = require("./modules/" + key + ".js");
+                    modules[key] = new module(config, automation.EventBus);
+                } catch (e) {
+                    console.log(e.message);
+                }
+            }
         }
 
-        if (config.people !== undefined && config.people.length > 0) {
-            modules["presence"] = new PresenceModule(config, AutomationModule.EventBus);
-        }
-
-        if (config.automation !== undefined) {
-            modules["automation"] = new AutomationModule.instance(config, modules);
-        }
-
-
-        if (config.api !== undefined) {
-            var port = config.api.port || 8124;
-            var apiServer = new HomeBotAPI(config, port, modules);
-        }
-
-        //Automation.EventBus.on("PresenceChange", function() {
-        //    console.log(config.people);
-        //});
+        var automationInstance = new automation.instance(config, modules);
 
     }
 } else {
