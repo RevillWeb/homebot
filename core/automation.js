@@ -2,6 +2,7 @@
 
 var events = require('events');
 var EventBus = new events.EventEmitter();
+var winston = require('winston');
 
 var AutomationModule = function(config, modules) {
 
@@ -17,10 +18,10 @@ var AutomationModule = function(config, modules) {
         }
     };
 
-    var _processItem = function(item) {
+    var _processConditions = function(conditions) {
         var result = null;
-        if (item.conditions !== undefined && item.conditions.length > 0) {
-            item.conditions.forEach(function (condition) {
+        if (conditions !== undefined && conditions.length > 0) {
+            conditions.forEach(function (condition) {
                 if (result === null) {
                     var conditionResult = null;
                     if (modules[condition.module] !== undefined) {
@@ -41,32 +42,37 @@ var AutomationModule = function(config, modules) {
                 result = true;
             }
         }
-
-        if (result === true) {
-            if (item.true_actions !== undefined && item.true_actions.length > 0) {
-                console.log("INFO (Automation) - Executing true actions.");
-                item.true_actions.forEach(function (action) {
-                    _executeAction(action);
-                });
-            }
-        } else if (result === false) {
-            if (item.false_actions !== undefined && item.false_actions.length > 0) {
-                console.log("INFO (Automation) - Executing false actions.");
-                item.false_actions.forEach(function (action) {
-                    _executeAction(action);
-                });
-            }
-        }
+        return result;
     };
 
     if (config.core.automation !== undefined && config.core.automation.length > 0) {
-        config.core.automation.forEach(function(item){
+        var history = {};
+        config.core.automation.forEach(function(item) {
             //Register for appropriate events based on module
             if (item.conditions !== undefined && item.conditions.length > 0) {
-                item.conditions.forEach(function(condition){
+                item.conditions.forEach(function(condition) {
                     if (modules[condition.module] !== undefined) {
                         EventBus.on(condition.module + "-update", function() {
-                            _processItem(item);
+                            var result = _processConditions(item.conditions);
+                            //Only execute actions when the result changes
+                            if (result !== history[condition.module]) {
+                                if (result === true) {
+                                    if (item.true_actions !== undefined && item.true_actions.length > 0) {
+                                        console.log("INFO (Automation) - Executing true actions.");
+                                        item.true_actions.forEach(function (action) {
+                                            _executeAction(action);
+                                        });
+                                    }
+                                } else if (result === false) {
+                                    if (item.false_actions !== undefined && item.false_actions.length > 0) {
+                                        console.log("INFO (Automation) - Executing false actions.");
+                                        item.false_actions.forEach(function (action) {
+                                            _executeAction(action);
+                                        });
+                                    }
+                                }
+                            }
+                            history[condition.module] = result;
                         });
                     }
                 });

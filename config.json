@@ -1,5 +1,9 @@
 {
   "modules": {
+    "sun": {
+      "latitude": 52.877598,
+      "longitude": -1.450981
+    },
     "lightwaverf": {
       "ip": "192.168.0.5",
       "api": {
@@ -64,9 +68,15 @@
         "title": "Keep Twigs on when someone is home",
         "conditions": [
           {
+            "module": "sun",
+            "data": {
+              "value": "dark"
+            }
+          },
+          {
             "module": "presence",
             "data": {
-              "person": "everyone",
+              "person": "someone",
               "property": "home",
               "value": true
             }
@@ -100,8 +110,14 @@
         ]
       },
       {
-        "title": "Turn lights on when media is paused on TV",
+        "title": "Turn lights on when media is paused on TV and its night time",
         "conditions": [
+          {
+            "module": "sun",
+            "data": {
+              "value": "dark"
+            }
+          },
           {
             "module": "plex",
             "data": {

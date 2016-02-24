@@ -7,7 +7,20 @@ var LightwaverfModule = function(config) {
 
     var lw = new lightwave({ip: config.modules.lightwaverf.ip});
     var _actions = ["on", "off", "dim"];
-
+    var _cache = {};
+    var _isDuplicate = function(room, device, action, data) {
+        if (_cache[room + "_" + device] !== undefined) {
+            if (_cache[room + "_" + device].action === action && JSON.stringify(_cache[room + "_" + device].data) === JSON.stringify(data)) {
+                return true;
+            }
+        }
+    };
+    var _cacheAction = function(room, device, action, data) {
+        _cache[room + "_" + device] = {
+            action: action,
+            data: data
+        };
+    };
     var service = {
         "getRoomIdByName": function (roomName) {
             var id = undefined;
@@ -64,48 +77,53 @@ var LightwaverfModule = function(config) {
                 var deviceId = service.getDeviceIdByNameAndRoom(device, room);
                 if (deviceId !== undefined) {
                     delay = delay || 0;
-                    setTimeout(function () {
-                        switch (action) {
-                            case "on":
-                                lw.turnDeviceOn(roomId, deviceId, function (error, content) {
-                                    if (error) {
-                                        deferred.reject(error.message);
+                    if (!_isDuplicate(room, device, action, data)) {
+                        _cacheAction(room, device, action, data);
+                        setTimeout(function () {
+                            switch (action) {
+                                case "on":
+                                    lw.turnDeviceOn(roomId, deviceId, function (error, content) {
+                                        if (error) {
+                                            deferred.reject(error.message);
+                                        } else {
+                                            deferred.resolve(content);
+                                        }
+                                    });
+                                    break;
+                                case "off":
+                                    lw.turnDeviceOff(roomId, deviceId, function (error, content) {
+                                        if (error) {
+                                            deferred.reject(error.message);
+                                        } else {
+                                            deferred.resolve(content);
+                                        }
+                                    });
+                                    break;
+                                case "dim":
+                                    var brightness = parseInt(data);
+                                    if (!isNaN(brightness)) {
+                                        if (brightness >= 0 && brightness <= 100) {
+                                            lw.setDeviceDim(roomId, deviceId, brightness, function (error, content) {
+                                                if (error) {
+                                                    deferred.reject(error.message);
+                                                } else {
+                                                    deferred.resolve(content);
+                                                }
+                                            });
+                                        } else {
+                                            deferred.reject("Invalid brightness level, 0 - 100 only.");
+                                        }
                                     } else {
-                                        deferred.resolve(content);
+                                        deferred.reject("Invalid action specified.");
                                     }
-                                });
-                                break;
-                            case "off":
-                                lw.turnDeviceOff(roomId, deviceId, function (error, content) {
-                                    if (error) {
-                                        deferred.reject(error.message);
-                                    } else {
-                                        deferred.resolve(content);
-                                    }
-                                });
-                                break;
-                            case "dim":
-                                var brightness = parseInt(data);
-                                if (!isNaN(brightness)) {
-                                    if (brightness >= 0 && brightness <= 100) {
-                                        lw.setDeviceDim(roomId, deviceId, brightness, function (error, content) {
-                                            if (error) {
-                                                deferred.reject(error.message);
-                                            } else {
-                                                deferred.resolve(content);
-                                            }
-                                        });
-                                    } else {
-                                        deferred.reject("Invalid brightness level, 0 - 100 only.");
-                                    }
-                                } else {
+                                    break;
+                                default:
                                     deferred.reject("Invalid action specified.");
-                                }
-                                break;
-                            default:
-                                deferred.reject("Invalid action specified.");
-                        }
-                    }, delay);
+                            }
+                        }, delay);
+                    } else {
+                        deferred.resolve("Already performed this last time.");
+                    }
                 } else {
                     deferred.reject("Device '" + device + "' in room '" + room + "' doesn't exist");
                 }

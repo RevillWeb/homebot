@@ -12,9 +12,9 @@ var TimeModule = function(config, EventBus) {
         }
     }
     //We are using time so lets update every 5 minutes
-    setInterval(function() {
-        EventBus.emit("time-update");
-    }, interval);
+    //setInterval(function() {
+    //    EventBus.emit("time-update");
+    //}, interval);
 
     var service = {
         "evalCondition": function(condition) {

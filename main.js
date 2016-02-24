@@ -35,7 +35,6 @@ if (configPath !== null) {
         if (config.modules !== undefined) {
             for (var key in config.modules) {
                 try {
-                    //modules[key] = new require("./" + key + "Module")(config);
                     var module = require("./modules/" + key + ".js");
                     modules[key] = new module(config, automation.EventBus);
                 } catch (e) {
